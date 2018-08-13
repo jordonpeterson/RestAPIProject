@@ -1,5 +1,7 @@
 const Joi = require('joi');
 const express = require('express');
+const fetch = require('node-fetch');
+//Allows me to use a global.fetch similar to the window.fetch available in the browser.
 
 
 
@@ -7,13 +9,29 @@ const app = express();
 //Creates an express application called App
 app.use(express.json())
 //parses incoming requests with JSON payloads.
-
+//How could I organize this better?
 values = [
     {id:1, name:"a"},
     {id:2, name:"b"},
     {id:3, name:"c"}
 ]
+const joiValidate = (input) =>{
+    const schema = {
+        name: Joi.string().max(40).required()
+    };
+    return Joi.validate(input, schema)
+}
 
+app.get('/3rdparty',(req,res) => {
+    fetch('https://swapi.co/api/people/1/')
+        .then(function(response) {
+            res.send(response.json());
+        })
+        .then(function(myJson) {
+            //console.log(myJson)
+            res.send(myJson)
+        });
+});
 app.get('/',(req,res) =>{
     res.send('hello world')
 })
@@ -40,12 +58,7 @@ app.post('/users', (req, res) => {
     values.push(value);
     res.send(value);
 })
-const joiValidate = (input) =>{
-    const schema = {
-        name: Joi.string().max(40).required()
-    };
-    return Joi.validate(input, schema)
-}
+
 
 app.put('/users/:id',(req, res) => {
     const value = values.find(c => c.id ===parseInt(req.params.id));
